@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseTopBar(
+private fun ExpenseTopBar(
     navController: NavHostController,
     currentDestination: NavDestination?,
     expenseReportViewModel: ExpenseReportViewModel,
@@ -83,29 +84,29 @@ fun ExpenseTopBar(
             type = "application/pdf"
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }, "Share Expense Report"))
+        }, context.getString(R.string.pdf_share_dialog_title)))
     }
 
     when (currentDestination?.route) {
         Screen.List.route -> {
-            TopAppBar(title = { Text("DashBoard") })
+            TopAppBar(title = { Text(stringResource(R.string.dashboard_title)) })
         }
 
         Screen.Entry.route -> {
-            CenterAlignedTopAppBar(title = { Text("Add Expense") }, navigationIcon = {
+            CenterAlignedTopAppBar(title = { Text(stringResource(R.string.add_expense_title)) }, navigationIcon = {
                 IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_button_desc))
                 }
             })
         }
 
         Screen.Report.route -> {
-            TopAppBar(title = { Text("Expense Report") }, actions = {
+            TopAppBar(title = { Text(stringResource(R.string.export_report_desc)) }, actions = {
                 IconButton(onClick = {
-                    context.showToast("Exporting Report...")
+                    context.showToast(R.string.export_report_desc)
                     sharePdfFile(context)
                 }) {
-                    Icon(Icons.Default.Share, contentDescription = "Export")
+                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.export_report_desc))
                 }
             })
         }
@@ -113,7 +114,7 @@ fun ExpenseTopBar(
 }
 
 @Composable
-fun ExpenseBottomBar(
+private fun ExpenseBottomBar(
     navController: NavHostController, currentDestination: NavDestination?, items: List<Screen>
 ) {
     if (currentDestination?.route != Screen.Entry.route) {
@@ -144,12 +145,12 @@ fun ExpenseBottomBar(
 }
 
 @Composable
-fun ExpenseFab(navController: NavHostController, currentDestination: NavDestination?) {
+private fun ExpenseFab(navController: NavHostController, currentDestination: NavDestination?) {
     if (currentDestination?.route == Screen.List.route) {
         FloatingActionButton(onClick = {
             navController.navigate(Screen.Entry.route)
         }) {
-            Icon(Icons.Default.Add, contentDescription = "Add Expense")
+            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_expense_title))
         }
     }
 }

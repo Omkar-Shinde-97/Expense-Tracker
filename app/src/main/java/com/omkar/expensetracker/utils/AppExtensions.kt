@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import android.widget.Toast
+import com.omkar.expensetracker.R
 import com.omkar.expensetracker.expensereport.CategoryTotal
 import com.omkar.expensetracker.expensereport.DailyTotal
 import java.io.File
@@ -17,44 +18,27 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 import kotlin.collections.forEach
 
 
 fun String.toFormattedDate(): String {
-    val localDate = LocalDate.parse(this, DateTimeFormatter.ISO_LOCAL_DATE) // parses yyyy-MM-dd
-    val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH)
-    return localDate.format(formatter)
+    val localDate = LocalDate.parse(this, DateTimeFormatter.ISO_LOCAL_DATE)
+    return localDate.format(DateUtils.MMM_dd_yyyy_FORMATTER)
 }
 
-fun Context.showToast(message: String) {
-    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-}
-
-fun Long.toStartOfDayMillis(): Long {
-    val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-    cal.timeInMillis = this
-    cal.set(Calendar.HOUR_OF_DAY, 0)
-    cal.set(Calendar.MINUTE, 0)
-    cal.set(Calendar.SECOND, 0)
-    cal.set(Calendar.MILLISECOND, 0)
-    return cal.timeInMillis
+fun Context.showToast(messageId: Int) {
+    Toast.makeText(this, this.getString(messageId), Toast.LENGTH_SHORT).show()
 }
 
 fun Long.toFormattedDateString(): String {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
-    return Instant.ofEpochMilli(this)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-        .format(formatter)
+    return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+        .format(DateUtils.YYYY_MM_DD_FORMATTER)
 }
 
 fun Context.generateExpenseReportPdfVisual(
-    dailyTotals: List<DailyTotal>,
-    categoryTotals: List<CategoryTotal>
+    dailyTotals: List<DailyTotal>, categoryTotals: List<CategoryTotal>
 ): File {
     val pdfDocument = PdfDocument()
     val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4
@@ -66,14 +50,12 @@ fun Context.generateExpenseReportPdfVisual(
     paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
     var y = 40f
 
-    // Title
-    canvas.drawText("Expense Report", 40f, y, paint)
+    canvas.drawText(this.getString(R.string.expense_report_title), 40f, y, paint)
     y += 30f
 
-    // Daily Totals Section
     paint.textSize = 16f
     paint.typeface = Typeface.DEFAULT
-    canvas.drawText("Daily Totals (Last 7 days)", 40f, y, paint)
+    canvas.drawText(this.getString(R.string.daily_totals_title), 40f, y, paint)
     y += 20f
 
     val chartHeight = 200f
@@ -81,7 +63,6 @@ fun Context.generateExpenseReportPdfVisual(
     val startX = 40f
     val startY = y + chartHeight
 
-    // Draw Bar Chart
     val maxAmount = dailyTotals.maxOfOrNull { it.total } ?: 1.0
     val barWidth = chartWidth / dailyTotals.size
     val barPaint = Paint().apply { color = Color.parseColor("#243c5a") }
@@ -94,7 +75,6 @@ fun Context.generateExpenseReportPdfVisual(
         val bottom = startY
         canvas.drawRect(left, top, right, bottom, barPaint)
 
-        // Draw day label
         paint.textSize = 12f
         paint.color = Color.BLACK
         paint.textAlign = Paint.Align.CENTER
@@ -103,12 +83,11 @@ fun Context.generateExpenseReportPdfVisual(
 
     y = startY + 50f
 
-    // Category-wise Totals
     paint.textAlign = Paint.Align.LEFT  // Important!
     paint.textSize = 16f
     paint.typeface = Typeface.DEFAULT
     paint.color = Color.BLACK
-    canvas.drawText("Category-wise Totals", 40f, y, paint)
+    canvas.drawText(this.getString(R.string.category_wise_totals_title), 40f, y, paint)
     y += 20f
 
     val rectPaint = Paint().apply {
@@ -121,11 +100,9 @@ fun Context.generateExpenseReportPdfVisual(
     }
 
     categoryTotals.forEach { cat ->
-        // Draw rounded rectangle background
         val rect = RectF(40f, y, 555f, y + 40f)
         canvas.drawRoundRect(rect, 8f, 8f, rectPaint)
 
-        // Draw category name and amount
         canvas.drawText(cat.category, 50f, y + 25f, textPaint)
         textPaint.textAlign = Paint.Align.RIGHT
         canvas.drawText("₹${cat.total}", 540f, y + 25f, textPaint)
@@ -135,7 +112,6 @@ fun Context.generateExpenseReportPdfVisual(
 
     pdfDocument.finishPage(page)
 
-    // Save file
     val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
     val fileName = "ExpenseReport_${sdf.format(Date())}.pdf"
     val file = File(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName)

@@ -27,9 +27,7 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): ExpenseDatabase {
         return Room.databaseBuilder(
-            context,
-            ExpenseDatabase::class.java,
-            "expense_database"
+            context, ExpenseDatabase::class.java, "expense_database"
         ).build()
     }
 

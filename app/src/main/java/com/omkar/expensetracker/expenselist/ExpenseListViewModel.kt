@@ -1,10 +1,8 @@
 package com.omkar.expensetracker.expenselist
 
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omkar.expensetracker.ExpenseRepository
-import com.omkar.expensetracker.MainApplication
 import com.omkar.expensetracker.database.entity.ExpenseEntity
 import com.omkar.expensetracker.utils.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,18 +24,18 @@ class ExpenseListViewModel @Inject constructor(
    private val repository: ExpenseRepository,
 ) : ViewModel() {
 
-    private val _selectedDate = MutableStateFlow(DateUtils.extractDateOnly())
-    val selectedDate: StateFlow<String> = _selectedDate
+    private val _selectedDate = MutableStateFlow<String?>(DateUtils.extractDateOnly())
+    val selectedDate: StateFlow<String?> = _selectedDate
 
     val expenses: StateFlow<List<ExpenseEntity>> =
-        _selectedDate.flatMapLatest { date -> repository.getExpensesByDate(date) }
+        _selectedDate.flatMapLatest { date -> if (date.isNullOrBlank()) repository.getAllExpenses() else repository.getExpensesByDate(date) }
             .stateIn(viewModelScope, SharingStarted.Companion.Lazily, emptyList())
 
     val totalSpent: StateFlow<Double> =
-        _selectedDate.flatMapLatest { date -> repository.getTotalSpentByDate(date) }
+        _selectedDate.flatMapLatest { date -> if(date.isNullOrBlank()) repository.getTotalSpent() else  repository.getTotalSpentByDate(date) }
             .map { it ?: 0.0 }.stateIn(viewModelScope, SharingStarted.Companion.Lazily, 0.0)
 
-    fun changeDate(date: String) {
+    fun changeDate(date: String?) {
         _selectedDate.update { date }
     }
 

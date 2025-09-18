@@ -1,10 +1,11 @@
 package com.omkar.expensetracker.database.dao
 
-import androidx.room.*
+import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.omkar.expensetracker.database.entity.ExpenseEntity
 import com.omkar.expensetracker.expensereport.CategoryTotal
-import com.omkar.expensetracker.expensereport.DailyTotal
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,9 +25,6 @@ interface ExpenseDao {
 
     @Query("SELECT SUM(amount) FROM expenses")
     fun getTotalSpent(): Flow<Double?>
-
-    @Query("SELECT strftime('%w', date/1000, 'unixepoch') as dayOfWeek, SUM(amount) as total FROM expenses WHERE date >= :sevenDaysAgo GROUP BY dayOfWeek ORDER BY dayOfWeek")
-    fun getDailyTotals(sevenDaysAgo: Long): Flow<List<DailyTotal>>
 
     // ✅ Category totals
     @Query("SELECT category, SUM(amount) as total FROM expenses GROUP BY category")

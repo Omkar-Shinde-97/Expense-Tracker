@@ -66,17 +66,4 @@ class ExpenseRepository @Inject constructor(private val expenseDao: ExpenseDao) 
             list.map { CategoryTotal(it.category, it.total) }
         }
     }
-
-    private fun mapDayOfWeek(dayNum: String): String {
-        return when (dayNum) {
-            "0" -> "Sun"
-            "1" -> "Mon"
-            "2" -> "Tue"
-            "3" -> "Wed"
-            "4" -> "Thu"
-            "5" -> "Fri"
-            "6" -> "Sat"
-            else -> dayNum
-        }
-    }
 }

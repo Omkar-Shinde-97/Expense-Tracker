@@ -9,7 +9,8 @@ import java.util.Locale
 
 object DateUtils {
 
-    private val YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
+     val YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
+     val MMM_dd_yyyy_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH)
     fun getCurrentDateTime(): String {
         val now = ZonedDateTime.now()
         return now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
@@ -18,8 +19,7 @@ object DateUtils {
     fun extractDateOnly(): String {
         val zonedDateTime =
             ZonedDateTime.parse(getCurrentDateTime(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
-        return zonedDateTime.format(formatter)
+        return zonedDateTime.format(YYYY_MM_DD_FORMATTER)
     }
 
     fun getPastNDaysDateStrings(days: Int): List<String> {

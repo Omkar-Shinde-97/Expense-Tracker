@@ -23,9 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.omkar.expensetracker.R
 import com.omkar.expensetracker.ui.theme.ExpenseTrackerTheme
 
 data class DailyTotal(val dayOfWeek: String, val total: Double)
@@ -50,13 +52,19 @@ fun ExpenseReportScreenComponent(
     ) {
 
         item {
-            Text("Daily Totals (Last 7 days)", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.daily_totals_title),
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(modifier = Modifier.height(8.dp))
             BarChart(dailyTotals.map { it.total }, dailyTotals.map { it.dayOfWeek })
         }
 
         item {
-            Text("Category-wise Totals", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.category_wise_totals_title),
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(modifier = Modifier.height(8.dp))
             CategoryList(categoryTotals)
         }
@@ -87,8 +95,7 @@ fun BarChart(values: List<Double>, labels: List<String>) {
                     modifier = Modifier
                         .width(24.dp)
                         .height(chartAreaHeight)
-                        .graphicsLayer { alpha = 0.99f },
-                    contentAlignment = Alignment.BottomCenter
+                        .graphicsLayer { alpha = 0.99f }, contentAlignment = Alignment.BottomCenter
                 ) {
                     Canvas(
                         modifier = Modifier
@@ -97,17 +104,14 @@ fun BarChart(values: List<Double>, labels: List<String>) {
                     ) {
                         if (barHeightRatio > 0f) {
                             drawRect(
-                                color = barColor,
-                                topLeft = Offset(0f, 0f),
-                                size = size
+                                color = barColor, topLeft = Offset(0f, 0f), size = size
                             )
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = labels[index],
-                    style = MaterialTheme.typography.bodySmall
+                    text = labels[index], style = MaterialTheme.typography.bodySmall
                 )
             }
         }
@@ -139,7 +143,7 @@ fun CategoryList(categories: List<CategoryTotal>) {
 
 @PreviewLightDark
 @Composable
-fun ExpenseReportScreenPreview() {
+private fun ExpenseReportScreenPreview() {
     ExpenseTrackerTheme {
         ExpenseReportScreenComponent(
             dailyTotals = listOf(

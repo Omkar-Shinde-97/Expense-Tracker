@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.omkar.expensetracker.R
 import com.omkar.expensetracker.database.entity.ExpenseEntity
+import com.omkar.expensetracker.utils.AppConstants.FOOD
+import com.omkar.expensetracker.utils.AppConstants.STAFF
+import com.omkar.expensetracker.utils.AppConstants.TRAVEL
+import com.omkar.expensetracker.utils.AppConstants.UTILITY
 import com.omkar.expensetracker.utils.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +61,7 @@ fun ExpenseEntryScreen(
                     receipt = receipt
                 )
             )
-            context.showToast("Expense added successfully")
+            context.showToast(R.string.expense_saved_successfully)
             navController.popBackStack()
         })
 }
@@ -70,11 +75,11 @@ fun ExpenseEntryScreenComponent(
     val context = LocalContext.current
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("Staff") }
+    var category by remember { mutableStateOf(STAFF) }
     var notes by remember { mutableStateOf("") }
     var receipt by remember { mutableStateOf<String?>(null) }
 
-    val categories = listOf("Staff", "Travel", "Food", "Utility")
+    val categories = listOf(STAFF, TRAVEL, FOOD, UTILITY)
     var expanded by remember { mutableStateOf(false) }
 
     Column(
@@ -92,7 +97,7 @@ fun ExpenseEntryScreenComponent(
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Title") },
+            label = { Text(stringResource(R.string.expense_title_label)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -102,7 +107,7 @@ fun ExpenseEntryScreenComponent(
         OutlinedTextField(
             value = amount,
             onValueChange = { if (it.all { c -> c.isDigit() }) amount = it },
-            label = { Text("Amount (₹)") },
+            label = { Text(stringResource(R.string.expense_amount_label)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
@@ -118,7 +123,7 @@ fun ExpenseEntryScreenComponent(
                 value = category,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Category") },
+                label = { Text(stringResource(R.string.select_category)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
                     .menuAnchor()
@@ -140,7 +145,7 @@ fun ExpenseEntryScreenComponent(
         OutlinedTextField(
             value = notes,
             onValueChange = { if (it.length <= 100) notes = it },
-            label = { Text("Notes (optional)") },
+            label = { Text(stringResource(R.string.expense_notes_label)) },
             singleLine = false,
             modifier = Modifier.fillMaxWidth()
         )
@@ -151,16 +156,18 @@ fun ExpenseEntryScreenComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
-                .clickable { receipt = "mock_receipt.jpg" },
-            contentAlignment = Alignment.Center
+                .clickable { receipt = "mock_receipt.jpg" }, contentAlignment = Alignment.Center
         ) {
             if (receipt != null) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_launcher_background),
-                    contentDescription = "Receipt"
+                    contentDescription = stringResource(R.string.tap_to_add_receipt)
                 )
             } else {
-                Text("Tap to upload receipt", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    stringResource(R.string.tap_to_add_receipt),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
 
@@ -169,13 +176,19 @@ fun ExpenseEntryScreenComponent(
         Button(
             onClick = {
                 if (title.isNotBlank() && amount.isNotBlank()) {
-                    onSubmit(title, amount.toDouble(), category, notes, receipt)
+                    if (amount.toDouble() > 0) onSubmit(
+                        title, amount.toDouble(), category, notes, receipt
+                    )
+                    else context.showToast(R.string.amount_should_greater_than_zero)
                 } else {
-                    context.showToast("Please Enter Title and Amount")
+                    if (title.isBlank()) context.showToast(R.string.error_empty_title)
+                    else context.showToast(
+                        R.string.error_invalid_amount
+                    )
                 }
             }, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Submit Expense")
+            Text(stringResource(R.string.submit))
         }
     }
 }
@@ -183,7 +196,7 @@ fun ExpenseEntryScreenComponent(
 
 @PreviewLightDark
 @Composable
-fun ExpenseEntryScreenPreview() {
+private fun ExpenseEntryScreenPreview() {
     ExpenseEntryScreenComponent(
         totalSpentToday = 1000.0, onSubmit = { title, amount, category, notes, receipt -> })
 }
