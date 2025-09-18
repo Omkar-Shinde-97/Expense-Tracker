@@ -208,6 +208,12 @@ fun ExpenseCard(expense: ExpenseEntity) {
                 text = "Date: ${expense.date?.toFormattedDate()}",
                 style = MaterialTheme.typography.bodySmall
             )
+            if (!expense.notes.isNullOrBlank()) {
+                Text(
+                    text = "Note: ${expense.notes}", style = MaterialTheme.typography.bodySmall
+                )
+            }
+
         }
     }
 }
