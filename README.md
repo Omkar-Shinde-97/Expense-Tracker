@@ -25,7 +25,7 @@ This app demonstrates **clean architecture, Jetpack Compose UI, and Room persist
   - **Amount** (₹)  
   - **Category** (mocked list: *Staff, Travel, Food, Utility*)  
   - **Optional Notes** 
-  - **Optional Receipt Image** (upload or mock)  
+  - **Optional Receipt Image**  
 - **Submit Button**: adds expense, shows Toast, animates entry  
 - Shows **real-time “Total Spent Today”** at the top  
 
@@ -46,9 +46,9 @@ This app demonstrates **clean architecture, Jetpack Compose UI, and Room persist
 - **Mock report for last 7 days**:
   - Daily totals  
   - Category-wise totals  
-  - Bar / Line chart (mocked)  
+  - Bar chart  
 - **Export options**:
-  - Simulate **PDF/CSV export**  
+  - Simulate **PDF export**  
   - Trigger **Share intent**  
 
 ---
