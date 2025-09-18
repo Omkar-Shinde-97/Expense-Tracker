@@ -9,15 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.omkar.expensetracker.R
 import com.omkar.expensetracker.database.entity.ExpenseEntity
+import com.omkar.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.omkar.expensetracker.utils.AppConstants.FOOD
 import com.omkar.expensetracker.utils.AppConstants.STAFF
 import com.omkar.expensetracker.utils.AppConstants.TRAVEL
@@ -66,6 +64,30 @@ fun ExpenseEntryScreen(
         })
 }
 
+@Composable
+fun UploadImageComponent() {
+    var receipt by remember { mutableStateOf<String?>(null) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .clickable { receipt = "mock_receipt.jpg" }, contentAlignment = Alignment.Center
+    ) {
+        if (receipt != null) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_background),
+                contentDescription = stringResource(R.string.tap_to_add_receipt)
+            )
+        } else {
+            Text(
+                stringResource(R.string.tap_to_add_receipt),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseEntryScreenComponent(
@@ -77,7 +99,6 @@ fun ExpenseEntryScreenComponent(
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf(STAFF) }
     var notes by remember { mutableStateOf("") }
-    var receipt by remember { mutableStateOf<String?>(null) }
 
     val categories = listOf(STAFF, TRAVEL, FOOD, UTILITY)
     var expanded by remember { mutableStateOf(false) }
@@ -89,45 +110,37 @@ fun ExpenseEntryScreenComponent(
     ) {
 
         Text(
-            text = "Total Spent Today: ₹$totalSpentToday",
+            text = stringResource(R.string.total_spent_today) + "$totalSpentToday",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        OutlinedTextField(
+        CommonOutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text(stringResource(R.string.expense_title_label)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label = stringResource(R.string.expense_title_label)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
+        CommonOutlinedTextField(
             value = amount,
             onValueChange = { if (it.all { c -> c.isDigit() }) amount = it },
-            label = { Text(stringResource(R.string.expense_amount_label)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            ),
-            modifier = Modifier.fillMaxWidth()
+            label = stringResource(R.string.expense_amount_label),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         ExposedDropdownMenuBox(
             expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-            OutlinedTextField(
+            CommonOutlinedTextField(
                 value = category,
                 onValueChange = {},
+                label = stringResource(R.string.select_category),
                 readOnly = true,
-                label = { Text(stringResource(R.string.select_category)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
+                modifier = Modifier.menuAnchor()
             )
             ExposedDropdownMenu(
                 expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -142,53 +155,31 @@ fun ExpenseEntryScreenComponent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
+        CommonOutlinedTextField(
             value = notes,
             onValueChange = { if (it.length <= 100) notes = it },
-            label = { Text(stringResource(R.string.expense_notes_label)) },
-            singleLine = false,
-            modifier = Modifier.fillMaxWidth()
+            label = stringResource(R.string.expense_notes_label),
+            singleLine = false
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .clickable { receipt = "mock_receipt.jpg" }, contentAlignment = Alignment.Center
-        ) {
-            if (receipt != null) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_background),
-                    contentDescription = stringResource(R.string.tap_to_add_receipt)
-                )
-            } else {
-                Text(
-                    stringResource(R.string.tap_to_add_receipt),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
+        UploadImageComponent()
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = {
-                if (title.isNotBlank() && amount.isNotBlank()) {
-                    if (amount.toDouble() > 0) onSubmit(
-                        title, amount.toDouble(), category, notes, receipt
-                    )
-                    else context.showToast(R.string.amount_should_greater_than_zero)
-                } else {
-                    if (title.isBlank()) context.showToast(R.string.error_empty_title)
-                    else context.showToast(
-                        R.string.error_invalid_amount
-                    )
-                }
-            }, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.submit))
+        SubmitButtonComponent(titleId = R.string.submit) {
+            if (title.isNotBlank() && amount.isNotBlank()) {
+                if (amount.toDouble() > 0) onSubmit(
+                    title, amount.toDouble(), category, notes, null
+                )
+                else context.showToast(R.string.amount_should_greater_than_zero)
+            } else {
+                if (title.isBlank()) context.showToast(R.string.error_empty_title)
+                else context.showToast(
+                    R.string.error_invalid_amount
+                )
+            }
         }
     }
 }
@@ -197,6 +188,9 @@ fun ExpenseEntryScreenComponent(
 @PreviewLightDark
 @Composable
 private fun ExpenseEntryScreenPreview() {
-    ExpenseEntryScreenComponent(
-        totalSpentToday = 1000.0, onSubmit = { title, amount, category, notes, receipt -> })
+    ExpenseTrackerTheme {
+        ExpenseEntryScreenComponent(
+            totalSpentToday = 1000.0, onSubmit = { title, amount, category, notes, receipt -> })
+    }
+
 }

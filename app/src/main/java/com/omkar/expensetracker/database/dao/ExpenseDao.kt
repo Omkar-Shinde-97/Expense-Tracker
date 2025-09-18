@@ -26,7 +26,6 @@ interface ExpenseDao {
     @Query("SELECT SUM(amount) FROM expenses")
     fun getTotalSpent(): Flow<Double?>
 
-    // ✅ Category totals
     @Query("SELECT category, SUM(amount) as total FROM expenses GROUP BY category")
     fun getCategoryTotals(): Flow<List<CategoryTotal>>
 

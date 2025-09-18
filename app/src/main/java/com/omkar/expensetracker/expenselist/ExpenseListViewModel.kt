@@ -74,9 +74,11 @@ class ExpenseListViewModel @Inject constructor(
     )
 
     fun toggleGroupingMode() {
-        _groupingMode.value = when (_groupingMode.value) {
-            GroupingMode.BY_CATEGORY -> GroupingMode.BY_DATE
-            GroupingMode.BY_DATE -> GroupingMode.BY_CATEGORY
+        _groupingMode.update {
+            when (_groupingMode.value) {
+                GroupingMode.BY_CATEGORY -> GroupingMode.BY_DATE
+                GroupingMode.BY_DATE -> GroupingMode.BY_CATEGORY
+            }
         }
     }
 
